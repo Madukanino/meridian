@@ -20,12 +20,12 @@
   "devDependencies": {
     "@types/node": "^26.6.2",
     "esbuild": "^0.28.2",
-    "turbo": "^2.10.13",
+    "turbo": "^2.11.6",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "prettier": "^3.9.9",
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.10.0"
+    "eslint": "^10.11.0"
   },
   "engines": {
     "node": ">=20.0.0",
