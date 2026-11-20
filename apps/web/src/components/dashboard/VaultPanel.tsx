@@ -5,6 +5,7 @@ import { useVaultActions } from "../../hooks/useVaultActions";
 import { useWalletStore } from "../../store/wallet";
 import { useWalletConnect } from "../../hooks/useWalletConnect";
 import { useRiskDisclosure } from "../../hooks/useRiskDisclosure";
+import { useBalance } from "../../hooks/useBalance";
 import { getWalletMeta, hasAcceptedRiskDisclosure } from "../../lib/wallet";
 import { PositionSummary } from "./PositionSummary";
 import { YieldHistoryChart } from "./YieldHistoryChart";
@@ -26,7 +27,7 @@ export function VaultPanel() {
   const { data, isLoading: vaultsLoading } = useVaults();
   const vaults = data?.vaults;
   const { t } = useTranslation();
-  const { connected, publicKey } = useWalletStore();
+  const { connected, publicKey, network } = useWalletStore();
   const {
     handleConnect,
     status: connectStatus,
@@ -40,6 +41,11 @@ export function VaultPanel() {
     isError: positionsError,
     refetch: refetchPositions,
   } = usePositions(publicKey);
+  const {
+    data: balance,
+    isError: balanceError,
+    refetch: refetchBalance,
+  } = useBalance(publicKey, network);
   const { deposit, withdraw, isDepositing, isWithdrawing } = useVaultActions();
 
   const [tab, setTab] = useState<Tab>("deposit");
@@ -294,6 +300,9 @@ export function VaultPanel() {
             hasPosition={!!hasPosition}
             isDepositing={isDepositing}
             onSubmit={handleDeposit}
+            availableBalance={balance}
+            isBalanceError={balanceError}
+            onRetryBalance={() => void refetchBalance()}
           />
         ) : (
           <WithdrawTab

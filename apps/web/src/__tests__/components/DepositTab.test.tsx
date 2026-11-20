@@ -21,14 +21,6 @@ const VAULT = {
   riskLevel: "safe" as const,
 };
 
-const POSITION = {
-  vaultId: "meridian-usdc",
-  shares: 50,
-  deposited: 100,
-  earned: 5,
-  entryTime: 1_700_000_000,
-};
-
 const onAmountChange = vi.fn();
 const onAmountKeyDown = vi.fn();
 const onSubmit = vi.fn();
@@ -110,16 +102,51 @@ describe("DepositTab", () => {
     expect(screen.getByText("vaultPanel.waiting")).toBeDefined();
   });
 
-  it("shows the current balance when hasPosition is true", () => {
-    renderDepositTab({ hasPosition: true, position: POSITION });
+  it("shows the wallet spendable balance when availableBalance is provided", () => {
+    renderDepositTab({ availableBalance: 100 });
 
-    expect(screen.getByText(/vaultPanel.balance/)).toBeDefined();
+    expect(screen.getByText(/vaultPanel\.balance:/)).toBeDefined();
   });
 
-  it("does not show a balance line when hasPosition is false", () => {
-    renderDepositTab({ hasPosition: false });
+  it("does not show a balance line when availableBalance is undefined", () => {
+    renderDepositTab({ availableBalance: undefined });
 
-    expect(screen.queryByText(/vaultPanel.balance/)).toBeNull();
+    expect(screen.queryByText(/vaultPanel\.balance:/)).toBeNull();
+  });
+
+  it("calls onAmountChange with spendable balance when Max button is clicked", () => {
+    renderDepositTab({ availableBalance: 100 });
+
+    fireEvent.click(screen.getByTestId("vault-deposit-max"));
+
+    expect(onAmountChange).toHaveBeenCalledWith("100");
+  });
+
+  it("calls onAmountChange with 0 when Max button is clicked with zero balance", () => {
+    renderDepositTab({ availableBalance: 0 });
+
+    fireEvent.click(screen.getByTestId("vault-deposit-max"));
+
+    expect(onAmountChange).toHaveBeenCalledWith("0");
+  });
+
+  it("shows a retryable error message rather than a zero balance when balance read fails", () => {
+    const onRetryBalance = vi.fn();
+    renderDepositTab({
+      availableBalance: 0,
+      isBalanceError: true,
+      onRetryBalance,
+    });
+
+    expect(screen.getByTestId("vault-balance-error")).toBeDefined();
+    expect(screen.getByText("vaultPanel.balanceError")).toBeDefined();
+    expect(screen.getByText("common.retry")).toBeDefined();
+    expect(screen.queryByText(/vaultPanel\.balance:/)).toBeNull();
+    expect(screen.queryByText("$0.00")).toBeNull();
+    expect(screen.queryByTestId("vault-deposit-max")).toBeNull();
+
+    fireEvent.click(screen.getByTestId("vault-balance-retry"));
+    expect(onRetryBalance).toHaveBeenCalledTimes(1);
   });
 
   it("calls onAmountChange when the input value changes", () => {

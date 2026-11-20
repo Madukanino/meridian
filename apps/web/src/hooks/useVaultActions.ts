@@ -129,6 +129,7 @@ export function useVaultActions() {
       // Without this, the vault panel's TVL/APY keep serving their cached
       // value for up to staleTime (5 min) after a deposit actually lands.
       queryClient.invalidateQueries({ queryKey: ["vaults"] });
+      queryClient.invalidateQueries({ queryKey: ["balance"] });
 
       // Optimistically raise the position in-place so the position card
       // reflects the deposit immediately instead of waiting for the async
@@ -230,6 +231,7 @@ export function useVaultActions() {
       // Without this, the vault panel's TVL/APY keep serving their cached
       // value for up to staleTime (5 min) after a withdrawal actually lands.
       queryClient.invalidateQueries({ queryKey: ["vaults"] });
+      queryClient.invalidateQueries({ queryKey: ["balance"] });
 
       // Optimistic update: partial withdrawal scales the position down in-place
       // so the position card stays visible with an approximate remaining balance.

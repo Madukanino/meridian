@@ -6,6 +6,7 @@ import { useVaults } from "../../hooks/useVaults";
 import { usePositions } from "../../hooks/usePositions";
 import { useVaultActions } from "../../hooks/useVaultActions";
 import { useWalletConnect } from "../../hooks/useWalletConnect";
+import { useBalance } from "../../hooks/useBalance";
 
 const refetchPositions = vi.fn();
 const deposit = vi.fn(async () => true);
@@ -13,6 +14,7 @@ const withdraw = vi.fn(async () => true);
 const handleConnect = vi.fn();
 const acceptRiskDisclosure = vi.fn();
 const cancelRiskDisclosure = vi.fn();
+const refetchBalance = vi.fn();
 
 const VAULT = {
   id: "meridian-usdc",
@@ -41,6 +43,7 @@ vi.mock("../../hooks/useVaults", () => ({ useVaults: vi.fn() }));
 vi.mock("../../hooks/usePositions", () => ({ usePositions: vi.fn() }));
 vi.mock("../../hooks/useVaultActions", () => ({ useVaultActions: vi.fn() }));
 vi.mock("../../hooks/useWalletConnect", () => ({ useWalletConnect: vi.fn() }));
+vi.mock("../../hooks/useBalance", () => ({ useBalance: vi.fn() }));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -77,6 +80,18 @@ function mockConnect(overrides: Partial<ReturnType<typeof useWalletConnect>>) {
   } as ReturnType<typeof useWalletConnect>);
 }
 
+function mockBalance(overrides: Partial<ReturnType<typeof useBalance>> = {}) {
+  vi.mocked(useBalance).mockReturnValue({
+    data: undefined,
+    balance: undefined,
+    spendableBalance: undefined,
+    isError: false,
+    isLoading: false,
+    refetch: refetchBalance,
+    ...overrides,
+  } as unknown as ReturnType<typeof useBalance>);
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   window.localStorage.clear();
@@ -94,6 +109,7 @@ beforeEach(() => {
     isWithdrawing: false,
   } as unknown as ReturnType<typeof useVaultActions>);
   mockConnect({});
+  mockBalance({});
 });
 
 describe("VaultPanel — position load error", () => {
